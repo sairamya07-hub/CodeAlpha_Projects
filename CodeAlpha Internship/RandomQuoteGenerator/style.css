@@ -1,0 +1,457 @@
+/* =====================================================
+   RANDOM QUOTE GENERATOR — Premium Aesthetic UI
+   ===================================================== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #07080f;
+  --surface: rgba(255,255,255,0.05);
+  --surface-2: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.1);
+  --border-bright: rgba(255,255,255,0.18);
+  --text: #f0f0ff;
+  --text-muted: rgba(240,240,255,0.5);
+  --accent: #c084fc;
+  --accent-2: #f472b6;
+  --accent-3: #38bdf8;
+  --gold: #fbbf24;
+  --radius: 24px;
+  --radius-sm: 14px;
+  --shadow: 0 24px 80px rgba(0,0,0,0.5);
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font: 'Inter', system-ui, sans-serif;
+}
+
+/* Light mode */
+body.light {
+  --bg: #f5f3ff;
+  --surface: rgba(0,0,0,0.04);
+  --surface-2: rgba(0,0,0,0.06);
+  --border: rgba(0,0,0,0.1);
+  --border-bright: rgba(0,0,0,0.15);
+  --text: #1a1040;
+  --text-muted: rgba(26,16,64,0.5);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.4s, color 0.4s;
+}
+
+/* Animated gradient background */
+.bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: 
+    radial-gradient(ellipse 80% 60% at 20% 20%, rgba(192,132,252,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% 70%, rgba(244,114,182,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 50% 50%, rgba(56,189,248,0.06) 0%, transparent 70%);
+  animation: bgShift 12s ease-in-out infinite alternate;
+}
+@keyframes bgShift {
+  from { filter: hue-rotate(0deg); }
+  to   { filter: hue-rotate(30deg); }
+}
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(7,8,15,0.6) 100%);
+}
+body.light .bg-canvas {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 20%, rgba(192,132,252,0.2) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% 70%, rgba(244,114,182,0.18) 0%, transparent 60%);
+}
+body.light .bg-overlay { background: transparent; }
+
+/* App shell */
+.app-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Header ─────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  background: rgba(7,8,15,0.5);
+}
+body.light .header { background: rgba(245,243,255,0.7); }
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--text);
+}
+.logo-sparkle { color: var(--gold); font-size: 1.5rem; animation: spin 6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.icon-btn {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(192,132,252,0.1); }
+.fav-count {
+  position: absolute;
+  top: -4px; right: -4px;
+  background: var(--accent-2);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+
+/* ─── Main Content ────────────────────────────────────── */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px 80px;
+  gap: 32px;
+}
+
+/* ─── Category Bar ────────────────────────────────────── */
+.category-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.cat-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 50px;
+  padding: 8px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+}
+.cat-btn:hover { border-color: var(--accent); color: var(--accent); }
+.cat-btn.active {
+  background: linear-gradient(135deg, rgba(192,132,252,0.25), rgba(244,114,182,0.15));
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ─── Quote Stage ─────────────────────────────────────── */
+.quote-stage {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ─── Quote Card ──────────────────────────────────────── */
+.quote-card {
+  width: 100%;
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  padding: 52px 48px 44px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  animation: cardIn 0.5s cubic-bezier(0.4,0,0.2,1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.quote-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 32px 100px rgba(0,0,0,0.55);
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.quote-glow {
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(192,132,252,0.2), transparent 70%);
+  pointer-events: none;
+}
+
+.quote-number {
+  position: absolute;
+  top: 20px; right: 24px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  font-family: var(--font);
+}
+
+.quote-body { position: relative; }
+.quote-mark {
+  font-family: var(--font-display);
+  font-size: 5rem;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.3;
+  user-select: none;
+}
+.quote-mark.open { margin-bottom: -20px; margin-left: -8px; }
+.quote-mark.close { text-align: right; margin-top: -30px; margin-right: -8px; }
+
+.quote-text {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--text);
+  text-align: center;
+  padding: 0 12px;
+  min-height: 80px;
+  transition: opacity 0.35s ease;
+}
+.quote-text.fade { opacity: 0; }
+
+.quote-author-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.author-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+.author-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.quote-category {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+/* ─── Action Buttons ──────────────────────────────────── */
+.action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.action-btn-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  color: var(--text-muted);
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+}
+.action-btn-pill:hover { border-color: var(--accent); color: var(--accent); background: rgba(192,132,252,0.1); transform: translateY(-2px); }
+.action-btn-pill.liked { border-color: var(--accent-2); color: var(--accent-2); background: rgba(244,114,182,0.12); }
+#heartIcon.liked { fill: var(--accent-2); }
+
+/* ─── New Quote Button ────────────────────────────────── */
+.new-quote-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 16px 40px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+  box-shadow: 0 8px 32px rgba(192,132,252,0.4);
+  letter-spacing: 0.3px;
+}
+.new-quote-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 14px 40px rgba(192,132,252,0.55); }
+.new-quote-btn:active { transform: scale(0.97); }
+.btn-icon { transition: transform 0.5s ease; }
+.new-quote-btn:hover .btn-icon { transform: rotate(180deg); }
+
+.quote-counter {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ─── Favorites Panel ─────────────────────────────────── */
+.panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.panel-backdrop.active { opacity: 1; pointer-events: all; }
+
+.favorites-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: min(400px, 100vw);
+  background: #0f1022;
+  border-left: 1px solid var(--border-bright);
+  z-index: 201;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -20px 0 60px rgba(0,0,0,0.5);
+}
+body.light .favorites-panel { background: #f0ebff; border-color: var(--border); }
+.favorites-panel.open { transform: translateX(0); }
+
+.fav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.fav-header h3 { font-size: 1.1rem; font-weight: 700; }
+.fav-list { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.fav-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  animation: fadeUp 0.3s ease;
+  position: relative;
+}
+.fav-item-text {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.fav-item-author {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.fav-remove {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+.fav-remove:hover { color: #fc5c7d; }
+.fav-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  padding: 40px 20px;
+  line-height: 1.8;
+}
+
+/* ─── Toast ───────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #1a1b3a;
+  border: 1px solid var(--border-bright);
+  color: var(--text);
+  padding: 12px 28px;
+  border-radius: 50px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  z-index: 999;
+  pointer-events: none;
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ─── Animations ──────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Responsive ──────────────────────────────────────── */
+@media (max-width: 600px) {
+  .header { padding: 16px 20px; }
+  .main-content { padding: 28px 16px 60px; }
+  .quote-card { padding: 36px 24px 32px; }
+  .quote-text { font-size: 1.18rem; }
+  .quote-mark { font-size: 3.5rem; }
+  .new-quote-btn { padding: 14px 30px; font-size: 0.92rem; }
+}
